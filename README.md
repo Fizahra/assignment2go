@@ -1,7 +1,10 @@
 # assignment2go
 #ini adalah tugas kedua di kelas golang, yaitu membuat rest API sederhana
 rest API-nya menggunakan gorm, gin, dan juga mysql.
-Untuk menggunakannya, bisa dengan aplikasi postman atau insomnia.
+
+##Sebelum menjalankan rest API-nya, file env.example harus direname dulu menjadi .env
+
+###Untuk menggunakannya, bisa dengan aplikasi postman atau insomnia.
 Lalu menulisakan alamat atau url http://localhost:8080/
 
 Perintah yang bisa dilakukan, yaitu POST, PUT, GET, dan DELETE.
