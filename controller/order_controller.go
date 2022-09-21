@@ -5,9 +5,11 @@ import (
 	"assignment2go/entity"
 	"assignment2go/helper"
 	"assignment2go/service"
+	"fmt"
 	"net/http"
 	"strconv"
 
+	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 )
 
@@ -20,12 +22,23 @@ type OrderController interface {
 
 type orderController struct {
 	orderService service.OrderService
+	jwtService   service.JWTService
 }
 
-func NewOrderController(orderServ service.OrderService) OrderController {
+func NewOrderController(orderServ service.OrderService, jwtServ service.JWTService) OrderController {
 	return &orderController{
 		orderService: orderServ,
+		jwtService:   jwtServ,
 	}
+}
+
+func (oc *orderController) getUserIDByToken(token string) string {
+	t, err := oc.jwtService.ValidateToken(token)
+	if err != nil {
+		panic(err.Error())
+	}
+	claim := t.Claims.(jwt.MapClaims)
+	return fmt.Sprintf("%v", claim["user_id"])
 }
 
 func (oc *orderController) All(c *gin.Context) {
@@ -41,25 +54,28 @@ func (oc *orderController) Insert(c *gin.Context) {
 		res := helper.BuildErrorResponse("Failed to process request", errDTO.Error(), helper.EmptyObj{})
 		c.JSON(http.StatusBadRequest, res)
 		return
+	} else {
+		autHeader := c.GetHeader("Authorization")
+		userID := oc.getUserIDByToken(autHeader)
+		convuserID, err := strconv.ParseUint(userID, 10, 64)
+		if err == nil {
+			orderCreateDTO.UserID = convuserID
+		}
+		res := oc.orderService.Insert(orderCreateDTO)
+		response := helper.BuildResponse(true, "OK", res)
+		c.JSON(http.StatusCreated, response)
+		return
 	}
-
-	result := oc.orderService.Insert(orderCreateDTO)
-	response := helper.BuildResponse(true, "OK", result)
-	c.JSON(http.StatusCreated, response)
-	return
 }
 
 func (oc *orderController) Update(c *gin.Context) {
-
-	var orderDTO dto.OrderUpdateDTO
-
-	if err := c.ShouldBind(&orderDTO); err != nil {
+	var order dto.OrderUpdateDTO
+	if err := c.ShouldBind(&order); err != nil {
 		res := helper.BuildErrorResponse("Failed to bind order", err.Error(), helper.EmptyObj{})
 		c.JSON(http.StatusBadRequest, res)
 		return
 	}
-
-	result, err := oc.orderService.Update(orderDTO)
+	result, err := oc.orderService.Update(order)
 	if err != nil {
 		res := helper.BuildErrorResponse("Failed to update order", err.Error(), helper.EmptyObj{})
 		c.JSON(http.StatusBadRequest, res)
@@ -77,7 +93,6 @@ func (oc *orderController) Delete(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, res)
 		return
 	}
-
 	if err := oc.orderService.DeleteOrder(c.Request.Context(), id); err != nil {
 		res := helper.BuildErrorResponse("Failed to delete order", err.Error(), helper.EmptyObj{})
 		c.JSON(http.StatusBadRequest, res)

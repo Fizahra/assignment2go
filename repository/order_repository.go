@@ -41,11 +41,10 @@ func (oc *orderConnection) UpdateOrder(order entity.Order) (entity.Order, error)
 	return order, nil
 }
 
-func (oc *orderConnection) DeleteOrder(ctx context.Context, id uint64) error {
-	tx := oc.connection.WithContext(ctx).Where("order_id = ?", id).Delete(&entity.Order{})
-
-	if tx.Error != nil {
-		return tx.Error
+func (oc *orderConnection) DeleteOrder(c context.Context, id uint64) error {
+	del := oc.connection.WithContext(c).Where("order_id = ?", id).Delete(&entity.Order{})
+	if del.Error != nil {
+		return del.Error
 	}
 	return nil
 }

@@ -5,6 +5,7 @@ import (
 	"assignment2go/entity"
 	"assignment2go/repository"
 	"context"
+	"fmt"
 	"log"
 
 	"github.com/mashingan/smapping"
@@ -16,6 +17,7 @@ type OrderService interface {
 	DeleteOrder(context.Context, uint64) error
 	GetOrder() []entity.Order
 	FindOrderByID(orderID uint64) entity.Order
+	Edit(UserID string, orderID uint64) bool
 }
 
 type orderService struct {
@@ -48,8 +50,8 @@ func (os *orderService) Update(order dto.OrderUpdateDTO) (entity.Order, error) {
 	return result, err
 }
 
-func (os *orderService) DeleteOrder(ctx context.Context, id uint64) error {
-	return os.orderRepository.DeleteOrder(ctx, id)
+func (os *orderService) DeleteOrder(c context.Context, id uint64) error {
+	return os.orderRepository.DeleteOrder(c, id)
 }
 
 func (os *orderService) GetOrder() []entity.Order {
@@ -58,4 +60,10 @@ func (os *orderService) GetOrder() []entity.Order {
 
 func (os *orderService) FindOrderByID(orderID uint64) entity.Order {
 	return os.orderRepository.FindOrderByID(orderID)
+}
+
+func (os *orderService) Edit(UserID string, orderID uint64) bool {
+	o := os.orderRepository.FindOrderByID(orderID)
+	id := fmt.Sprintf("%v", o.UserID)
+	return UserID == id
 }
