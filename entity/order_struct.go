@@ -2,7 +2,7 @@ package entity
 
 import "time"
 
-//book
+//struct order yang bakal dijadiin tabel buat database
 type Order struct {
 	OrderId      uint64    `gorm:"primary_key:auto_increment" json:"order_id"`
 	CustomerName string    `gorm:"type:varchar(255)" json:"name"`

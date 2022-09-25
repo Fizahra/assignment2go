@@ -51,7 +51,7 @@ func (oc *orderController) Insert(c *gin.Context) {
 	var orderCreateDTO dto.OrderCreateDTO
 	errDTO := c.ShouldBind(&orderCreateDTO)
 	if errDTO != nil {
-		res := helper.BuildErrorResponse("Failed to process request", errDTO.Error(), helper.EmptyObj{})
+		res := helper.BuildErrorResponse("Failed to bind order", errDTO.Error(), helper.EmptyObj{})
 		c.JSON(http.StatusBadRequest, res)
 		return
 	} else {

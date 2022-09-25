@@ -42,7 +42,7 @@ func (js *jwtService) GenerateToken(UserID string) string {
 	claim := &jwtClaim{
 		UserID,
 		jwt.StandardClaims{
-			ExpiresAt: time.Now().AddDate(1, 0, 0).Unix(),
+			ExpiresAt: time.Now().AddDate(0, 0, 1).Unix(),
 			Issuer:    js.issuer,
 			IssuedAt:  time.Now().Unix(),
 		},
